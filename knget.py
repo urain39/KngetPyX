@@ -392,7 +392,7 @@ class Knget():
             if len(self._task_pool) < 1:
                 break
             elif len(self._task_pool) < self._custom.get('page_limit'):
-                self.work(self._task_pool)
+                self.work()
                 break
             else:
                 self.work()
