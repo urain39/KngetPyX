@@ -108,6 +108,7 @@ venv.bak/
 *.png
 kn-*/
 cookies.json
+cookies.txt
 
 # KngetPy Screenshots
 !pics/screenshot1.png
