@@ -43,8 +43,6 @@ _DEFAUL_CONFIG = {
         'load_time_fake': '3-5'
     },
     'download': {
-        'debug': 0,
-        'thread': 8,
         'timeout': 10,
         'maxsize': 10,
         'bufsize': 1048576,
