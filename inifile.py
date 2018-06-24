@@ -1,13 +1,11 @@
-import os
-import sys
-import copy
+import os as _os
+import sys as _sys
 
 _DIGITS = "0123456789"
 _DEFAULT_SECTION = '0x22CAFE!'
 
 class IniException(Exception):
     pass
-
 
 class IniFile():
     def __init__(self, filename=None):
@@ -22,7 +20,7 @@ class IniFile():
             self._parser()
 
     def _parser(self):
-        if not os.path.exists(self._filename):
+        if not _os.path.exists(self._filename):
             raise IniException('Not found file named as [%s]' % self._filename)
 
         with open(self._filename, 'r') as _file:
@@ -45,7 +43,7 @@ class IniFile():
                         self._props.setdefault(self._section, {})
                     continue
                 else:
-                    if not '=' in _line:
+                    if not '=' in _line[1:]:
                         raise IniException('SyntaxError at [%s]' % _line)
 
                     for i in range(len(_line)):
@@ -55,6 +53,8 @@ class IniFile():
 
                             # XXX: I know it's not a good way,
                             #    : But it's better to read isn't is?
+                            
+                            # XXX: if all([]) then we will get True.
                             if all([i in _DIGITS for i in value] or [None]):
                                 self._props[self._section][key] = int(value)
                             else:
@@ -67,7 +67,7 @@ class IniFile():
         if self._props.get(section) is None:
             raise IniException('Section is empty!')
 
-        return copy.deepcopy(self._props[section].get(key))
+        return self._props[section].get(key)
 
     def add(self, key, value, section=None):
         section = section or self._section
@@ -89,7 +89,7 @@ class IniFile():
         if len(self._props[section]) == 0:
             del self._props[section]
 
-    def dump(self, fp=sys.stdout):
+    def dump(self, fp=_sys.stdout):
         for section in self._props.keys():
             if section != _DEFAULT_SECTION:
                 fp.write("[%s]\n" % section)
@@ -103,10 +103,10 @@ class IniFile():
         if self._props.get(section) is None:
             raise IniException('Section is empty!')
 
-        return copy.deepcopy(self._props[section])
+        return self._props[section]
 
     def reset(self, props=None):
-        self._props = copy.deepcopy(props)
+        self._props = props
 
     def section(self, section=None):
         section = section or self._section

@@ -30,10 +30,6 @@ username=knget
 password=knget.py
 
 [custom]
-;base_url=https://yande.re
-;base_url=http://behoimi.org
-;base_url=https://konachan.com
-;base_url=https://konachan.net
 base_url=https://capi.sankakucomplex.com
 ;base_url=https://iapi.sankakucomplex.com
 page_limit=10

@@ -79,7 +79,7 @@ class Knget():
 
         if os.path.exists('cookies.txt'):
             self._msg('Loading cookies.')
-            self._session.cookies.load(ignore_discard=True)
+            self._session.cookies.load()
 
     def _load_faker(self):
         load_time_fake = [
@@ -179,7 +179,8 @@ class Knget():
         )
 
         self._load_faker()
-        if not os.path.exists(file_name) or os.path.getsize(file_name) != file_size:
+        if ( not os.path.exists(file_name) or
+                os.path.getsize(file_name) != file_size ):
             with open(file_name, 'wb') as fp:
                 bufsize = self._config.get('bufsize') or (1<<20)
 
@@ -213,14 +214,16 @@ class Knget():
             self._task_pool = [
                 task
                 for task in self._task_pool
-                    if (task.get('score') or task.get('total_score' or 0)) >= post_min_score
+                    if int(task.get('score') or
+                        task.get('total_score') or 0) >= post_min_score
             ]
 
         if post_tags_blacklist != r'' and post_tags_blacklist != None:
             self._task_pool = [
                 task
                 for task in self._task_pool
-                    if all([tag not in post_tags_blacklist.split() for tag in task['tags'].split()])
+                    if all( tag not in post_tags_blacklist.split()
+                            for tag in task['tags'].split() )
             ]
 
     def work(self):
@@ -244,7 +247,8 @@ class Knget():
 
                 while True:
                     try:
-                        self._msg2('Process: %4d / %-4d' % (cur_jobs_count, jobs_count))
+                        self._msg2( 'Process: %4d / %-4d' %
+                                    (cur_jobs_count, jobs_count) )
 
                         self._download(job)
                         break
@@ -294,7 +298,7 @@ class Knget():
             else:
                 self.work()
         self._cleanup()
-        self._session.cookies.save(ignore_discard=True)
+        self._session.cookies.save()
 
 
 def usage(status=None):
