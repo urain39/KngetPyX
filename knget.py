@@ -222,8 +222,8 @@ class Knget():
             self._task_pool = [
                 task
                 for task in self._task_pool
-                    if all( tag not in post_tags_blacklist.split()
-                            for tag in task['tags'].split() )
+                    if all( tag['name'] not in post_tags_blacklist.split()
+                            for tag in task['tags'] )
             ]
 
     def work(self):
