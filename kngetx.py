@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # coding: utf-8
 
 import os
@@ -366,9 +366,9 @@ def main(argv):
     config_path = 'config.ini'
 
     if os.name == 'posix':
-        config_path = os.getenv('HOME') + '/knget.ini'
+        config_path = os.getenv('HOME') + '/kngetx.ini'
     elif os.name == 'nt':
-        config_path = os.getenv('HOMEPATH') + '/knget.ini'
+        config_path = os.getenv('HOMEPATH') + '/kngetx.ini'
 
     if os.path.exists(config_path):
         try:
