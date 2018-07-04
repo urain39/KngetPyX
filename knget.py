@@ -40,7 +40,10 @@ _DEFAULT_CONFIG = {
         'base_url': 'https://capi.sankakucomplex.com',
         'page_limit': 10,
         'user_agent': 'SCChannelApp/3.0 (Android; black)',
-        'load_time_fake': '3-5'
+        'load_time_fake': '1-2',
+        'post_rating': 'e q s',
+        'post_min_score': 100,
+        'post_tags_blacklist': 'video mp4 webm'
     },
     'download': {
         'timeout': 10,
@@ -298,17 +301,17 @@ class Knget():
 class KngetShell(Knget):
     def help(self):
         sys.stdout.write(
-            'Copyright (c) 2017-2018 urain39\n'
-            '    KngetPy & Knget Project\n'
+            'Copyright (c) 2017-2018 KngetPy Project\n'
             '\n'
-            'run <tag1> [<tag2>...] <begin> <end>\n'
-            'help show this message again\n'
-            'exit exit session\n'
-            'dir  show list of the current directory\n'
+            'exit, q       exit session\n'
+            'help, h       show this message again\n'
+            'run, task, r  <tag1> [<tag2>...] <begin> <end>\n'
+            'dir, list, d  show list of the current directory\n'
+            'login, l      login your account\n'
         )
 
     def _eval(self, line, cmd, args):
-            if cmd in ('run', 'task'):
+            if cmd in ('run', 'task', 'r'):
                 try:
                     if len(args) < 3:
                         self._msg2('#%d: args error!' % line)
@@ -317,23 +320,24 @@ class KngetShell(Knget):
                 except ValueError as e:
                     self._msg2(e)
                     self.help()
-            elif cmd in ('dir', 'ls'):
+            elif cmd in ('dir', 'ls', 'd'):
                 for _file in os.listdir(os.getcwd()):
                     sys.stdout.write(_file + '\n')
-            elif cmd in ('exit', 'quit'):
+            elif cmd in ('exit', 'quit', 'q'):
                 sys.exit(_NO_ERROR)
-            elif cmd in ('help',):
+            elif cmd in ('help', 'h'):
                 self.help()
+            elif cmd in ('login', 'l'):
+                self._login(
+                    username=str(self._account.get('username')),
+                    password=str(self._account.get('password'))
+                )
             else:
                 self._msg2('#%d: cannot found command %s' % (line, cmd))
                 self.help()
 
     def session(self):
         line = 0
-        self._login(
-            username=str(self._account.get('username')),
-            password=str(self._account.get('password'))
-        )
 
         while True:
             sys.stderr.write('KGSH> ')
@@ -359,15 +363,22 @@ def usage(status=None):
         sys.exit(status)
 
 def main(argv):
-    if os.path.exists('config.ini'):
+    config_path = 'config.ini'
+
+    if os.name == 'posix':
+        config_path = os.getenv('HOME') + '/knget.ini'
+    elif os.name == 'nt':
+        config_path = os.getenv('HOMEPATH') + '/knget.ini'
+
+    if os.path.exists(config_path):
         try:
-            config = IniFile('config.ini')
+            config = IniFile(config_path)
         except IniException as e:
             print('{0}\n'.format(e))
             print('Possible cannot read?')
             sys.exit(_CONFIG_ERROR)
     else:
-        with open('config.ini', 'w') as fp:
+        with open(config_path, 'w') as fp:
             config = IniFile()
             config.reset(_DEFAULT_CONFIG)
             fp.write(_CONFIG_TIPS + '\n')
