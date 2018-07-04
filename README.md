@@ -35,7 +35,7 @@ base_url=https://capi.sankakucomplex.com
 page_limit=10
 json_regex=Post.register\((\{.+\})\)
 top_tags_count=10
-load_time_fake=3-5     - 加载时间欺骗，躲避部分反爬虫检测
+load_time_fake=3-5
 user_agent=SCChannelApp/3.0 (Android; black)
 ;user_agent=SCChannelApp/3.0 (Android; idol)
 
@@ -44,8 +44,6 @@ post_min_score=50
 post_tags_blacklist=
 
 [download]
-debug=0
-thread=8
 timeout=120
 maxsize=150
 bufsize=1048576
