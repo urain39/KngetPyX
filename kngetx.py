@@ -4,13 +4,23 @@
 import os
 import re
 import sys
-import json
 import time
+import copy
 import random
+import json
+import shlex
 import requests
 from hashlib import sha1
 from inifile import IniFile
 from inifile import IniException
+from prompt_toolkit import PromptSession
+from prompt_toolkit.history import FileHistory
+
+__all__ = [
+    'main',
+    'Knget',
+    'KngetShell'
+]
 
 _NO_ERROR = 0
 _CONFIG_ERROR = 1
@@ -21,6 +31,9 @@ _DOWNLOAD_ERROR = 4
 _USAGE = '''\
 Usage: {0} <tags> <[begin]<end>>
 '''.format(sys.argv[0])
+
+# Ensure _PROMPT_STR is unicode
+_PROMPT_STR = u'KGSH> '
 
 _CONFIG_TIPS = '''\
 ; KngetPy Project.
@@ -59,10 +72,12 @@ _DEFAULT_CONFIG = {
 }
 
 class KngetError(Exception):
+    '''KngetPy BaseException.
+    '''
     pass
 
 
-class Knget():
+class Knget(object):
     def __init__(self, config):
         self._curdir = os.getcwd()
         self._custom = config.get_section('custom')
@@ -299,59 +314,124 @@ class Knget():
 
 
 class KngetShell(Knget):
+    '''KngetPy Extended Class for REPL.
+    '''
+
+    def __init__(self, config):
+        self._commands = {}
+        super(self.__class__, self).__init__(config)
+
+        # cmd_name, implement, args_count, help_msg
+        self.cmd_register('ls', self.listdir, 1, 'ls <dir_path>')
+        self.cmd_register('cd', self.chdir, 1, 'cd <dir_path>')
+        self.cmd_register('rm', self.remove, 1, 'rm <file_path>')
+        self.cmd_register('run', self.run, 3, 'run <tags> <[begin]<end>>')
+        self.cmd_register('rmdir', self.rmdir, 1, 'rmdir <dir_path>')
+        self.cmd_register('exit', self.exit, 0)
+        self.cmd_register('login', self.login, 0)
+
+    def run(self, tags, begin, end):
+        ''' Override method of Class Knget
+        '''
+        return super(self.__class__, self).run(tags, int(begin), int(end))
+
+    def listdir(self, dir_path):
+        if os.path.isdir(dir_path):
+            for _dir in os.listdir(dir_path):
+                print(_dir)
+
+    def chdir(self, dir_path):
+        if os.path.isdir(dir_path):
+            os.chdir(dir_path)
+
+    def remove(self, file_path):
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+
+    def rmdir(self, dir_path):
+        if os.path.isdir(dir_path):
+            os.rmdir(dir_path)
+
+    def exit(self):
+        self._cleanup()
+        sys.exit(_NO_ERROR)
+
+    def login(self):
+        self._login(**self._account)
+
+    def cmd_register(self, cmd_name, callback, args_count=0, help_msg=None):
+        ''' cmd_register: register a implemented method or function as a command
+            :param: cmd_name, command name
+            :param: callback, a implemented method or function
+            :param: args_count, args count without self
+            :param: help_msg, a short message of help for this command 
+        '''
+        # Pack
+        self._commands[cmd_name] = (callback, args_count, help_msg or '')
+
     def help(self):
-        sys.stdout.write(
-            'Copyright (c) 2017-2018 KngetPy Project\n'
-            '\n'
-            'exit, q       exit session\n'
-            'help, h       show this message again\n'
-            'run, task, r  <tag1> [<tag2>...] <begin> <end>\n'
-            'dir, list, d  show list of the current directory\n'
-            'login, l      login your account\n'
-        )
+        print('Copyright (c) 2017-2018 urain39@cyfan.cf\n')
+        print('Registered commands:')
 
-    def _eval(self, line, cmd, args):
-            if cmd in ('run', 'task', 'r'):
-                try:
-                    if len(args) < 3:
-                        self._msg2('#%d: args error!' % line)
-                    else:
-                        self.run(' '.join(args[0:-2]), int(args[-2]), int(args[-1]))
-                except ValueError as e:
-                    self._msg2(e)
-                    self.help()
-            elif cmd in ('dir', 'ls', 'd'):
-                for _file in os.listdir(os.getcwd()):
-                    sys.stdout.write(_file + '\n')
-            elif cmd in ('exit', 'quit', 'q'):
-                sys.exit(_NO_ERROR)
-            elif cmd in ('help', 'h'):
-                self.help()
-            elif cmd in ('login', 'l'):
-                self._login(
-                    username=str(self._account.get('username')),
-                    password=str(self._account.get('password'))
-                )
-            else:
-                self._msg2('#%d: cannot found command %s' % (line, cmd))
-                self.help()
+        for cmd_name, cmd_itself in self._commands.items():
+            _, _, help_msg = cmd_itself
+            print(' ' * 4 + '{0}\t\t{1}'.format(cmd_name, help_msg))
 
+    def execute(self, lineno, cmd_name, args):
+        if not cmd_name in self._commands.keys():
+            return self.help()
+        else:
+            # Unpack
+            callback, args_count, help_msg = self._commands[cmd_name]
+
+            # Check args count
+            if len(args) != args_count:
+                return self.help()
+
+            # Matched!
+            try:
+                callback(*args)
+            except (ValueError, OSError):
+                return sys.stderr.write(help_msg)
+ 
     def session(self):
-        line = 0
+        lineno = 0
 
-        while True:
-            sys.stderr.write('KGSH> ')
+        if not sys.stdin.isatty():
+            # Get stdin from a pipe.
+            while True:
+                line = sys.stdin.read()
+                lineno += 1
 
-            _line = sys.stdin.readline()
-            line += 1
+                if len(line) < 1:
+                    break # EOF
+                line = shlex.split(line)
 
-            if len(_line) < 1:
-                break # EOF
-            _line = _line.split()
+                if len(line) < 1:
+                    continue # Blank
+                self.execute(lineno, cmd_name=line[0], args=line[1:])
+        else:
+            # Get stdin from a tty-like devices.
 
-            if len(_line) < 1:
-                continue # Blank
-            self._eval(line, cmd=_line[0], args=_line[1:])
+            # XXX: When i try to using
+            #        prompt(_PROMPT_STR,
+            #               history=FileHistory('history.txt'))
+            #        on Python2 that i got a problem, it say
+            #        TypeError: prompt() got an unexpected keyword argument 'history'
+            #
+            # See also:
+            # https://github.com/jonathanslenders/python-prompt-toolkit/blob/master/examples/prompts/history/slow-history.py
+            # https://github.com/jonathanslenders/python-prompt-toolkit/blob/master/examples/prompts/history/persistent-history.py
+            _session = PromptSession(message=_PROMPT_STR,
+                                     history=FileHistory('history.txt'))
+            while True:
+                line = _session.prompt()
+                line = shlex.split(line)
+                lineno += 1
+
+                if len(line) < 1:
+                    continue # Blank
+                self.execute(lineno, cmd_name=line[0], args=line[1:])
 
 
 def usage(status=None):
@@ -375,7 +455,7 @@ def main(argv):
             config = IniFile(config_path)
         except IniException as e:
             print('{0}\n'.format(e))
-            print('Possible cannot read?')
+            print('Possible config syntax error?')
             sys.exit(_CONFIG_ERROR)
     else:
         with open(config_path, 'w') as fp:
@@ -396,5 +476,5 @@ def main(argv):
 if __name__ == '__main__':
     try:
         main(sys.argv)
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, EOFError):
         sys.exit(_NO_ERROR)
