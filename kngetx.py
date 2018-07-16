@@ -327,8 +327,9 @@ class KngetShell(Knget):
         self.cmd_register('rm', self.remove, 1, 'rm <file_path>')
         self.cmd_register('run', self.run, 3, 'run <tags> <[begin]<end>>')
         self.cmd_register('rmdir', self.rmdir, 1, 'rmdir <dir_path>')
-        self.cmd_register('exit', self.exit, 0)
-        self.cmd_register('login', self.login, 0)
+        self.cmd_register('reload', self.reload, 0, 'reload config')
+        self.cmd_register('exit', self.exit, 0, 'exit this session')
+        self.cmd_register('login', self.login, 0, 'login your account')
 
     def run(self, tags, begin, end):
         ''' Override method of Class Knget
@@ -351,6 +352,10 @@ class KngetShell(Knget):
     def rmdir(self, dir_path):
         if os.path.isdir(dir_path):
             os.rmdir(dir_path)
+
+    def reload(self, config=None):
+        config = config or load_config()
+        self.__init__(config)
 
     def exit(self):
         self._cleanup()
@@ -375,7 +380,7 @@ class KngetShell(Knget):
 
         for cmd_name, cmd_itself in self._commands.items():
             _, _, help_msg = cmd_itself
-            print(' ' * 4 + '{0}\t\t{1}'.format(cmd_name, help_msg))
+            print(' ' * 4 + '{0:10s}{1}'.format(cmd_name, help_msg))
 
     def execute(self, lineno, cmd_name, args):
         if not cmd_name in self._commands.keys():
@@ -423,7 +428,7 @@ class KngetShell(Knget):
             # https://github.com/jonathanslenders/python-prompt-toolkit/blob/master/examples/prompts/history/slow-history.py
             # https://github.com/jonathanslenders/python-prompt-toolkit/blob/master/examples/prompts/history/persistent-history.py
             _session = PromptSession(message=_PROMPT_STR,
-                                     history=FileHistory('history.txt'))
+                                     history=FileHistory(os.getcwd() + 'history.txt'))
             while True:
                 line = _session.prompt()
                 line = shlex.split(line)
@@ -442,8 +447,8 @@ def usage(status=None):
     else:
         sys.exit(status)
 
-def main(argv):
-    config_path = 'config.ini'
+def load_config():
+    config_path = 'configx.ini'
 
     if os.name == 'posix':
         config_path = os.getenv('HOME') + '/kngetx.ini'
@@ -463,6 +468,11 @@ def main(argv):
             config.reset(_DEFAULT_CONFIG)
             fp.write(_CONFIG_TIPS + '\n')
             config.dump(fp)
+
+    return config
+
+def main(argv):
+    config = load_config()
 
     if len(argv) < 3:
         KngetShell(config).session()
