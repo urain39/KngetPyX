@@ -92,7 +92,7 @@ class Knget(object):
                 'Connection': 'Keep-Alive',
                 'User-Agent': self._custom.get('user_agent'),
         }
-        self._session.cookies = requests.cookies.cookielib.LWPCookieJar('cookies.txt')
+        self._session.cookies = requests.cookies.cookielib.LWPCookieJar(self._curdir + '/cookies.txt')
 
         if os.path.exists('cookies.txt'):
             self._msg('Loading cookies.')
@@ -358,7 +358,6 @@ class KngetShell(Knget):
         self.__init__(config)
 
     def exit(self):
-        self._cleanup()
         sys.exit(_NO_ERROR)
 
     def login(self):
@@ -417,19 +416,8 @@ class KngetShell(Knget):
                     continue # Blank
                 self.execute(lineno, cmd_name=line[0], args=line[1:])
         else:
-            # Get stdin from a tty-like devices.
-
-            # XXX: When i try to using
-            #        prompt(_PROMPT_STR,
-            #               history=FileHistory('history.txt'))
-            #        on Python2 that i got a problem, it say
-            #        TypeError: prompt() got an unexpected keyword argument 'history'
-            #
-            # See also:
-            # https://github.com/jonathanslenders/python-prompt-toolkit/blob/master/examples/prompts/history/slow-history.py
-            # https://github.com/jonathanslenders/python-prompt-toolkit/blob/master/examples/prompts/history/persistent-history.py
             _session = PromptSession(message=_PROMPT_STR,
-                                     history=FileHistory(os.getcwd() + '/history.txt'))
+                                     history=FileHistory(self._curdir + '/history.txt'))
             while True:
                 line = _session.prompt()
                 line = shlex.split(line)
