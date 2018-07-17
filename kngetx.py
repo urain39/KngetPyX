@@ -384,6 +384,7 @@ class KngetShell(Knget):
 
     def execute(self, lineno, cmd_name, args):
         if not cmd_name in self._commands.keys():
+            self._msg2('#%d: Not found command %s\n' % (lineno, cmd_name))
             return self.help()
         else:
             # Unpack
