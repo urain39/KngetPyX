@@ -306,7 +306,6 @@ class Knget(object):
             except (requests.exceptions.RequestException, ValueError) as e:
                 self._msg2('Error: {0}'.format(e))
                 self._msg2('Quitting...')
-                self._cleanup()
                 break
 
             # Do the job from index data.
