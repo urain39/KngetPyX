@@ -33,7 +33,7 @@ Usage: {0} <tags> <[begin]<end>>
 '''.format(sys.argv[0])
 
 # Ensure _PROMPT_STR is unicode
-_PROMPT_STR = u'KGSH> '
+_PROMPT_STR = u'KGXSH> '
 
 _CONFIG_TIPS = '''\
 ; KngetPy Project.
@@ -294,16 +294,22 @@ class Knget(object):
                     'tags': tags,
                     'limit': self._custom.get('page_limit')
             }
-            payload.update(self._login_data)
 
-            response = self._session.get(
-                self._custom.get('base_url') + '/post/index.json',
-                timeout=self._config.get('timeout'),
-                params=payload
-            )
+            # Get index data.
+            try:
+                response = self._session.get(
+                    self._custom.get('base_url') + '/post/index.json',
+                    timeout=self._config.get('timeout'),
+                    params=payload )
 
-            self._task_pool = response.json()
+                self._task_pool = response.json()
+            except (requests.exceptions.RequestException, ValueError) as e:
+                self._msg2('Error: {0}'.format(e))
+                self._msg2('Quitting...')
+                self._cleanup()
+                break
 
+            # Do the job from index data.
             if len(self._task_pool) < 1:
                 break
             elif len(self._task_pool) < self._custom.get('page_limit'):
