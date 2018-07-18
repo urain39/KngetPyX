@@ -6,7 +6,7 @@
 python <标签> <[起始页]结束页>
 
 示例:
-	python 'seifuku' 10
+	python -m kngetx 'seifuku' 1
 ```
 
 
