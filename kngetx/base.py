@@ -11,8 +11,8 @@ import json
 import shlex
 import requests
 from hashlib import sha1
-from inifile import IniFile
-from inifile import IniException
+from .inifile import IniFile
+from .inifile import IniException
 from prompt_toolkit import PromptSession
 from prompt_toolkit.history import FileHistory
 
