@@ -173,7 +173,7 @@ class Knget(object):
         protocol = re.match(r'((?:ht|f)tps?:).*', url)
 
         if protocol is None:
-            # 从base_url获取协议头
+            # Get protocol from base_url
             base_url = self._custom.get('base_url')
             return re.match(r'((?:ht|f)tps?:).*', base_url).group(1) + url
 
@@ -184,7 +184,7 @@ class Knget(object):
         file_size = job['file_size']
         file_name = '{post_id}.{file_ext}'.format(
             post_id=job['id'],
-            # 使用较保守的方法获取扩展名
+            # XXX: Some sites not have file_ext!
             file_ext=job['file_url'].split('.')[-1]
         )
 
@@ -344,6 +344,7 @@ class KngetShell(Knget):
         self.cmd_register('reload', self.reload, 0, 'reload config')
         self.cmd_register('exit', self.exit, 0, 'exit this session')
         self.cmd_register('login', self.login, 0, 'login your account')
+        self.cmd_register('debug', self.debug, 0, 'show debug messages')
 
     def run(self, tags, begin, end):
         ''' Override method of Class Knget
@@ -376,6 +377,11 @@ class KngetShell(Knget):
 
     def login(self):
         self._login(**self._account)
+
+    def debug(self):
+        self._msg('DEBUG')
+        self._msg2('Cookies: {0}'.format(self._session.cookies))
+        self._msg2('Headers: {0}'.format(self._session.headers))
 
     def cmd_register(self, cmd_name, callback, args_count=0, help_msg=None):
         ''' cmd_register: register a implemented method or function as a command
