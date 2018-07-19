@@ -118,13 +118,13 @@ class Knget(object):
 
         appkey = sha1(
             'sankakuapp_{0}_Z5NE9YASej'.format(
-                username
+                str(username)
             ).encode()
         ).hexdigest()
 
         password_hash = sha1(
             'choujin-steiner--{0}--'.format(
-                password
+                str(password)
             ).encode()
         ).hexdigest()
 
@@ -306,6 +306,8 @@ class Knget(object):
 
                 if not isinstance(self._task_pool, list):
                     self._msg2('Error: response is not a list!')
+                    self._msg2('Debug: {0}'.format(self._task_pool))
+                    self._msg2('Debug: {0}'.format(self._session.cookies))
                     self._msg2('Breaking...')
                     break
             except (requests.exceptions.RequestException, ValueError) as e:
@@ -408,8 +410,9 @@ class KngetShell(Knget):
             # Matched!
             try:
                 callback(*args)
-            except (ValueError, OSError):
-                return sys.stderr.write(help_msg)
+            except (ValueError, OSError) as e:
+                self._msg2('Error: {0}'.format(e))
+                self._msg2('Usage: {0}'.format(help_msg))
  
     def session(self):
         lineno = 0
