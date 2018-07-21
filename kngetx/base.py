@@ -386,6 +386,7 @@ class KngetShell(Knget):
         self._msg2('Cookies: {0}'.format(self._session.cookies))
         self._msg2('Headers: {0}'.format(self._session.headers))
         self._msg2('Logined: {0}'.format(self._login_data))
+        self._msg2('WorkDir: {0}'.format(self._curdir))
 
     def cmd_register(self, cmd_name, callback, args_count=0, help_msg=None):
         ''' cmd_register: register a implemented method or function as a command
