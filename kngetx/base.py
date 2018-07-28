@@ -346,6 +346,7 @@ class KngetShell(Knget):
         self.cmd_register('login', self.login, 0, 'login your account')
         self.cmd_register('debug', self.debug, 0, 'show debug messages')
         self.cmd_register('runcmd', self.runcmd, 1, 'run terminal command')
+        self.cmd_register('setprop', self.setprop, 2, 'setprop <propkey> <value>')
 
     def run(self, tags, begin, end):
         ''' Override method of Class Knget
@@ -366,14 +367,42 @@ class KngetShell(Knget):
 
     def reload(self, config=None):
         config = config or load_config()
-        self.__init__(config)
+        self._custom = config.get_section('custom')
+        self._config = config.get_section('download')
+        self._session.headers = {
+                'Accept': '*/*',
+                'Connection': 'Keep-Alive',
+                'User-Agent': self._custom.get('user_agent'),
+        }
 
     def debug(self):
         self._msg('DEBUG')
+        self._msg2('WorkDir: {0}'.format(self._curdir))
+        self._msg2('Logined: {0}'.format(self._login_data))
         self._msg2('Cookies: {0}'.format(self._session.cookies))
         self._msg2('Headers: {0}'.format(self._session.headers))
-        self._msg2('Logined: {0}'.format(self._login_data))
-        self._msg2('WorkDir: {0}'.format(self._curdir))
+        self._msg2('Configs: {0}'.format(self._config))
+
+    def setprop(self, propkey, value):
+        _config = {
+            'custom': self._custom,
+            'download': self._config,
+            'account': self._account
+        }
+        propkey = propkey.split('.')
+
+        if len(propkey) == 2:
+            section, key = propkey
+            
+            if not (section in _config.keys() and
+                     key in _config[section].keys()):
+                return
+
+            _config[section][key] = value
+
+            config = IniFile()
+            config.reset(_config)
+            self.reload(config)
 
     def cmd_register(self, cmd_name, callback, args_count=0, help_msg=None):
         ''' cmd_register: register a implemented method or function as a command
