@@ -321,7 +321,8 @@ class Knget(object):
             # Do the job from index data.
             if len(self._task_pool) < 1:
                 break
-            elif len(self._task_pool) < self._custom.get('page_limit'):
+            # NOTE: int(xxx) to fix compare bug on Python2.
+            elif len(self._task_pool) < int(self._custom.get('page_limit')):
                 self.work()
                 break
             else:
@@ -353,8 +354,6 @@ class KngetShell(Knget):
         '''
         return super(self.__class__, self).run(tags, int(begin), int(end))
 
-        self.__init__(config)
-
     def exit(self):
         sys.exit(_NO_ERROR)
 
@@ -382,6 +381,7 @@ class KngetShell(Knget):
         self._msg2('Cookies: {0}'.format(self._session.cookies))
         self._msg2('Headers: {0}'.format(self._session.headers))
         self._msg2('Configs: {0}'.format(self._config))
+        self._msg2('Customs: {0}'.format(self._custom))
 
     def setprop(self, propkey, value):
         _config = {
@@ -397,7 +397,6 @@ class KngetShell(Knget):
             if not (section in _config.keys() and
                      key in _config[section].keys()):
                 return
-
             _config[section][key] = value
 
             config = IniFile()
