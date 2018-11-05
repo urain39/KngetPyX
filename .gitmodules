@@ -1,0 +1,3 @@
+[submodule "KngetPy"]
+	path = KngetPy
+	url = https://github.com/urain39/KngetPy
