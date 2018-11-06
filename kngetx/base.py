@@ -86,8 +86,10 @@ class KngetX(Knget):
                 json.dump(config, fp, indent=2)
 
         self._custom = config.get('custom')
-        self._account = config.get('account')
         self._config = config.get('download')
+
+    def _chdir(self, tags):
+        super(KngetX, self)._chdir(tags, prefix='kgx-')
 
     def _filter(self):
         post_rating = self._custom.get('post_rating')
