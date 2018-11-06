@@ -45,10 +45,12 @@ For example:
     "bufsize": 1048576,
     "retry_wait": 8,
     "retry_count": 3
-  },
-  "account": {
-    "username": "knget",
-    "password": "knget.py"
   }
 }
 ```
+
+
+**NOTE**: No longer support login for Sankakucomplex!
+
+![HolyShit!](images/a5cc28c8.jpg)
+
