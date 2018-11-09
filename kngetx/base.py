@@ -53,7 +53,9 @@ _DEFAULT_CONFIG = {
         'history_path': 'history.txt',
         'save_cookies': False,
         'cookies_path': 'cookies.txt',
-        'disable_dbgrun': True  # It's not safety!
+        'disable_dbgrun': True,  # It's not safety!
+        # NO DOCS HERE, SO RTFS PLEASE! NOTE: `Knget._download`
+        'filename_format': '{ordered_id:06d}_{file_id}.{file_ext}',
     },
     'download': {
         'timeout': 30,
