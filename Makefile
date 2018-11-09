@@ -19,14 +19,14 @@ kngetx: knget setup.py
 	@ - sed -Ei 's,^ *(__version__.*debug.*),# \1,g' \
 					kngetx/__version__.py
 	@test -f dist/kngetx-*.tar.gz || python setup.py sdist
-	cp $(KNGET_DIR)/dist/* ./dist/
+	@test -f dist/knget-*.tar.gz || cp $(KNGET_DIR)/dist/* ./dist/
 
 .PHONY: debug
-debug: knget-debug
+debug: knget-debug setup.py
 	@ - sed -Ei 's,^# *(__version__.*debug.*),\1,g' \
 					kngetx/__version__.py
-	@test -f dist/knget-*.tar.gz || python setup.py sdist
-	cp $(KNGET_DIR)/dist/* ./dist/
+	@test -f dist/kngetx-*.tar.gz || python setup.py sdist
+	@test -f dist/knget-*.tar.gz || cp $(KNGET_DIR)/dist/* ./dist/
 
 .PHONY: clean
 clean:
