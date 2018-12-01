@@ -75,6 +75,7 @@ class KngetX(Knget):
     """Extended class Knget for sankakucomplex.
     """
 
+    # Please Keep it, Someone may need it.
     def load_config(self, config_path=None):
         # config = {}
         config_path = config_path or (self._homedir + '/kngetx.json')
@@ -165,9 +166,9 @@ def usage(status=None):
 
 def main(argv):
     with KngetXShell() as kgxsh:
-        if len(argv) < 3:
+        if len(argv[1:]) < 3:
             kgxsh.session()
-        elif len(argv) < 4:
+        elif len(argv[1:]) < 4:
             kgxsh.run(*argv[1:])
         else:
             return usage(_USAGE_ERROR)
