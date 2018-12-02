@@ -34,8 +34,8 @@ _USAGE_ERROR = 2
 _CONNECT_ERROR = 3
 _DOWNLOAD_ERROR = 4
 
-_USAGE = '''\
-Usage: {0} <tags> <[begin]<end>>
+_CMD = 'python -m kngetx'
+_USAGE = '''Usage: {0} <tags> < <begin> [end] >
 '''.format(sys.argv[0])
 
 # Ensure _PROMPT_STR is unicode
@@ -166,16 +166,16 @@ def usage(status=None):
 
 def main(argv):
     with KngetXShell() as kgxsh:
-        if len(argv[1:]) < 3:
+        if len(argv) < 2:
             kgxsh.session()
-        elif len(argv[1:]) < 4:
-            kgxsh.run(*argv[1:])
+        elif len(argv) < 4:
+            kgxsh.run(*argv)
         else:
             return usage(_USAGE_ERROR)
 
 
 if __name__ == '__main__':
     try:
-        main(sys.argv)
+        main(sys.argv[1:])
     except (KeyboardInterrupt, EOFError):
         sys.exit(_NO_ERROR)
