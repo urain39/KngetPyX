@@ -3,4 +3,4 @@ KngetPy2.0
 
     Extended KngetPy for SankakuComplex
 
-    Usage: python -m kngetx <tags> < [begin] <end> >
+    Usage: python -m kngetx <tags> < <begin> [end] >

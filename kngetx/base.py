@@ -35,8 +35,8 @@ _CONNECT_ERROR = 3
 _DOWNLOAD_ERROR = 4
 
 _CMD = 'python -m kngetx'
-_USAGE = '''Usage: {0} <tags> < <begin> [end] >
-'''.format(sys.argv[0])
+_USAGE = '\
+Usage: {0} <tags> < <begin> [end] >\n'.format(_CMD)
 
 # Ensure _PROMPT_STR is unicode
 _PROMPT_STR = u'KGXSH> '

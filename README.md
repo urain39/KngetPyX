@@ -14,7 +14,7 @@
 ### User Guide ###
 
 ```shell
-python -m kngetx <tags> <[begin] end>
+python -m kngetx <tags> < <begin> [end] >
 
 For example:
 	python -m kngetx 'seifuku' 1 1
