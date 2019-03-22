@@ -63,6 +63,10 @@ _DEFAULT_CONFIG = {
         'bufsize': 1048576,
         'retry_wait': 8,
         'retry_count': 3
+    },
+    'account': {
+        'username': 'knget',
+        'password': 'knget.py'
     }
 }
 
@@ -89,10 +93,47 @@ class KngetX(Knget):
                 json.dump(config, fp, indent=2)
 
         self._custom = config.get('custom')
+        self._account = config.get('account')
         self._config = config.get('download')
 
     def _chdir(self, tags):
         super(KngetX, self)._chdir(tags, prefix='kgx-')
+
+    def _login(self, username, password):
+        if self._logged:
+            return self._msg2("Logined, skip login.")
+
+        appkey = sha1(
+            'sankakuapp_{0}_Z5NE9YASej'.format(username).encode()
+        ).hexdigest()
+
+        password_hash = sha1(
+            'choujin-steiner--{0}--'.format(password).encode()
+        ).hexdigest()
+
+        self._login_data.update({
+                'login': username,
+                'password_hash': password_hash,
+                'appkey': appkey
+            })
+
+        response = self._session.post(
+            '{base_url}/user/authenticate.json'.format(
+                base_url=self._custom.get('base_url')
+            ),
+            data={
+                'user[name]': username,
+                'user[password]': password,
+                'appkey': appkey
+            })
+
+        if not (response.ok and response.json().get('success')):
+            self._msg2('Error: cannot login!')
+            raise KngetXError('Cannot login!',
+                              reason=response.json().get('reason'))
+            return
+
+        self._logged = True
 
     def _filter(self):
         post_rating = self._custom.get('post_rating')
@@ -128,8 +169,6 @@ class KngetXCommand(KngetCommand):
 
         if command:
             self._commands = command.commands
-            self._commands.pop('login')
-            self._commands.pop('autologin')
 
     @property
     def commands(self):

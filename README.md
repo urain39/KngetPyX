@@ -20,9 +20,9 @@ For example:
 	python -m kngetx 'seifuku' 1 1
 ```
 
-**NOTE**: No longer support login for Sankakucomplex!
+~~**NOTE**: No longer support login for Sankakucomplex!~~
 
-![HolyShit!](images/a5cc28c8.jpg)
+<!--![HolyShit!](images/a5cc28c8.jpg)-->
 
 ### Custom configuration ###
 
